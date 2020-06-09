@@ -45,10 +45,7 @@ public class DishWasher {
     private RunResult run(WashingProgram program, FillLevel fillLevel) {
         try {
             door.lock();
-            if (!program.equals(WashingProgram.RINSE)) {
-                runProgram(program, fillLevel);
-            }
-            runProgram(WashingProgram.RINSE, fillLevel);
+            runProgram(program, fillLevel);
         } catch (EngineException e) {
             return error(Status.ERROR_PROGRAM);
         } catch (PumpException e) {
@@ -66,14 +63,14 @@ public class DishWasher {
 
     private RunResult success(WashingProgram program) {
         return RunResult.builder()
-                        .withStatus(SUCCESS)
-                        .withRunMinutes(program.getTimeInMinutes())
-                        .build();
+                .withStatus(SUCCESS)
+                .withRunMinutes(program.getTimeInMinutes())
+                .build();
     }
 
     private RunResult error(Status errorPump) {
         return RunResult.builder()
-                        .withStatus(errorPump)
-                        .build();
+                .withStatus(errorPump)
+                .build();
     }
 }
