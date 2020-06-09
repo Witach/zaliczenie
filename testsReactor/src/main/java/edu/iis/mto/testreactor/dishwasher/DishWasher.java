@@ -37,7 +37,7 @@ public class DishWasher {
 
     private boolean filterIsClean(ProgramConfiguration program) {
         if (program.isWashingTabletsUsed()) {
-            return dirtFilter.capacity() > MAXIMAL_FILTER_CAPACITY;
+            return dirtFilter.capacity() <= MAXIMAL_FILTER_CAPACITY;
         }
         return true;
     }
