@@ -15,6 +15,9 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -33,7 +36,7 @@ class DishWasherTest {
 
     @BeforeEach
     public void setUp() {
-        dishWasher = new DishWasher(waterPump,engine,dirtFilter,door);
+        dishWasher = new DishWasher(waterPump, engine, dirtFilter, door);
     }
 
     @Test
@@ -50,7 +53,7 @@ class DishWasherTest {
     }
 
     @Test
-    public void shouldReturnErrorIfDoorAreNotClosed(){
+    public void shouldReturnErrorIfDoorAreNotClosed() {
         ProgramConfiguration programConfiguration = standardProgrammeConfiguration(false);
         when(door.closed()).thenReturn(false);
         RunResult runResult = dishWasher.start(programConfiguration);
@@ -58,7 +61,7 @@ class DishWasherTest {
     }
 
     @Test
-    public void shouldReturnErrorIfFileterIsOverloaded(){
+    public void shouldReturnErrorIfFileterIsOverloaded() {
         ProgramConfiguration programConfiguration = standardProgrammeConfiguration(true);
         when(door.closed()).thenReturn(true);
         when(dirtFilter.capacity()).thenReturn(51.d);
@@ -86,9 +89,24 @@ class DishWasherTest {
         assertEquals(Status.ERROR_PUMP, runResult.getStatus());
     }
 
+    @ParameterizedTest
+    @EnumSource(value = WashingProgram.class, names = {"INTENSIVE", "ECO", "RINSE", "NIGHT"})
+    public void shouldRunForExactPeriodOfTime(WashingProgram type) {
+        ProgramConfiguration programConfiguration = ProgramConfiguration.builder()
+                .withFillLevel(FillLevel.HALF)
+                .withProgram(type)
+                .withTabletsUsed(true)
+                .build();
+
+        when(door.closed()).thenReturn(true);
+        when(dirtFilter.capacity()).thenReturn(29.d);
+        RunResult runResult = dishWasher.start(programConfiguration);
+
+        assertEquals(type.getTimeInMinutes(), runResult.getRunMinutes());
+    }
 
 
-    ProgramConfiguration standardProgrammeConfiguration(boolean withTabletsUsed){
+    ProgramConfiguration standardProgrammeConfiguration(boolean withTabletsUsed) {
         return ProgramConfiguration.builder()
                 .withFillLevel(FillLevel.HALF)
                 .withProgram(WashingProgram.ECO)
